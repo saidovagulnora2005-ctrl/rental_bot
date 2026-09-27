@@ -1,4 +1,4 @@
-from aiogram import Bot, Dispatcher
+from aiogram import Bot, Dispatcher,F
 from aiogram.filters import Command
 from aiogram.types import Message
 from connection import init_table
@@ -108,6 +108,32 @@ async def my_rentals_handler(message: Message):
             text += f"ID вещи: {rental['item_id']}\n"
     else:
         text = "📦 У вас пока нет аренд!"
+    await message.answer(text)
+
+
+@dp.message(F.text == "🗃 Каталог")
+async def catalog_btn(message: Message):
+    items = await show_items()
+    if items:
+        text = "📝 Свободные вещи:\n\n"
+        for item in items:
+            text += f"{item['item_id']} - {item['name']}\n"
+    else:
+        text = "❌ Сейчас свободных вещей нет."
+    await message.answer(text)
+
+
+@dp.message(F.text == "📦 Мой инвентарь")
+async def my_rentals_btn(message: Message):
+    telegram_id = message.from_user.id
+    rentals = await my_rentals(telegram_id)
+    if rentals:
+        text = "📦 Мои аренды:\n\n"
+        for rental in rentals:
+            text += f"🆔 ID вещи: {rental['item_id']}\n"
+            text += f"📝 Название: {rental['name']}\n\n"
+    else:
+        text = "📦 У вас пока нет аренд."
     await message.answer(text)
 
 
