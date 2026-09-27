@@ -63,6 +63,54 @@ async def items_handler(message: Message):
     await message.answer(text)
 
 
+@dp.message(Command("rent"))
+async def rent_handler(message: Message):
+    parts = message.text.split()
+    if len(parts) < 2:
+        await message.answer("📦 Чтобы взять вещь в аренду, напиши:\n\n"
+            "/rent ID\n\n"
+            "Например:\n"
+            "/rent 1")
+    item_id = int(parts[1])
+    telegram_id = message.from_user.id
+    result = await rent(item_id, telegram_id)
+    if result:
+        await message.answer(
+            "✅ Вещь взята в аренду на 7 дней!")
+    else:
+        await message.answer("❌ Вещь уже арендована или не существует!")
+
+
+@dp.message(Command("return_item"))
+async def return_handler(message: Message):
+    parts = message.text.split()
+    if len(parts) < 2:
+        await message.answer("📦 Чтобы вернуть вещь напиши:\n\n"
+            "/return_item ID\n\n"
+            "Например:\n"
+            "/return_item 1")
+    item_id = int(parts[1])
+    telegram_id = message.from_user.id
+    result = await return_item(item_id, telegram_id)
+    if result:
+        await message.answer("✅ Вещь возвращена!")
+    else:
+        await message.answer("❌ У вас нет этой вещи!")
+
+
+@dp.message(Command("my_rentals"))
+async def my_rentals_handler(message: Message):
+    telegram_id = message.from_user.id
+    rentals = await my_rentals(telegram_id)
+    if rentals:
+        text = "📦 Мои аренды:\n\n"
+        for rental in rentals:
+            text += f"ID вещи: {rental['item_id']}\n"
+    else:
+        text = "📦 У вас пока нет аренд!"
+    await message.answer(text)
+
+
 async def main():
     await init_table()
     await dp.start_polling(bot)
