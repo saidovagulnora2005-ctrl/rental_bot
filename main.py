@@ -4,6 +4,7 @@ from aiogram.types import Message
 from connection import init_table
 from dotenv import load_dotenv
 from keyboard import main_btn
+from services import *
 import asyncio
 import os
 
@@ -31,6 +32,36 @@ async def help_handler(message: Message):
         "/return_item - Вернуть вещь\n"
         "Пример: /return_item 1\n\n"
         "/my_rentals - Показать мои аренды")
+
+
+
+@dp.message(Command("add_item"))
+async def add_item_handler(message: Message):
+    parts = message.text.split()
+    if len(parts) < 2:
+        await message.answer(
+            "📝 Чтобы добавить вещь, напиши:\n\n"
+            "/add_item Название вещи\n\n"
+            "Например:\n"
+            "/add_item Футбольный мяч ⚽")
+    name = " ".join(parts[1:])
+    await add_item(name)
+    await message.answer(
+        f"✅ {name} добавлен в каталог!")
+
+
+@dp.message(Command("items"))
+async def items_handler(message: Message):
+    items = await show_items()
+    if items:
+        text = "🏀🤿🛹 Свободные вещи:\n\n"
+        for item in items:
+            text += f"{item['item_id']} - {item['name']}\n"
+        text += "\n📌 Чтобы взять вещь в аренду пишем так:\n/rent ID"
+    else:
+        text = "❌ Сейчас свободных вещей нет."
+    await message.answer(text)
+
 
 async def main():
     await init_table()
